@@ -5,55 +5,73 @@ import "./App.css";
 
 const width = 512;
 const height = 255;
+let titles = {};
 
 function App() {
   const [png, setPng] = useState<string | null>(null);
   const [bgColor, setBgColor] = useState<string>("#888888");
-  const [isVisible, setIsVisible] = useState(false);
-  const toggleVisibility = () => {
-    setIsVisible(!isVisible);
+  const [textColor, setTxColor] = useState<string>("#010101");
+  const [isVisibleBG, setIsVisibleBG] = useState(false);
+  const [isVisibleTX, setIsVisibleTX] = useState(false);
+  const toggleVisibilityBG = () => {
+    setIsVisibleBG(!isVisibleBG);
   };
-
+  const toggleVisibilityTX = () => {
+    setIsVisibleTX(!isVisibleTX);
+  };
   useEffect(() => {
     const canvasElem = document.createElement("canvas");
-    canvasElem.width = width;
-    canvasElem.height = height;
+    canvasElem.width = width * 2;
+    canvasElem.height = height * 2;
     const ctx = canvasElem.getContext("2d");
 
     // draw
 
-    ctx.clearRect(0, 0, width, height);
+    ctx.clearRect(0, 0, canvasElem.width, canvasElem.height);
     ctx.fillStyle = bgColor;
-    ctx.fillRect(0, 0, width, height);
+    ctx.fillRect(0, 0, canvasElem.width, canvasElem.height);
 
+    ctx.fillStyle = textColor;
+    for (let i = 0; i < Object.keys(titles).length; i++) {
+      let x = 100;
+      ctx.fillText(titles[i].text, x, 300);
+      x = x + 200;
+    }
     setPng(canvasElem.toDataURL());
-  }, [bgColor, setBgColor]);
+  }, [bgColor, setBgColor, textColor]);
 
   const [darkMode, setDarkMode] = useState(false);
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
   };
-  function handleSubmit(e) {
+  function dissableClick(e) {
     e.preventDefault(); // これが必要
   }
-  const { register, control } = useForm({
+  const { register, control, handleSubmit } = useForm({
     defaultValues: {
-      sample: [
+      titles: [
         {
-          title: "",
+          text: "",
         },
       ],
     },
   });
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "sample",
+    name: "titles",
   });
-  const changeTextColor = (color: ColorResult) => {
+  const onSubmit = (data) => {
+    titles = data.titles;
+    console.log(JSON.stringify(titles));
+  };
+  const changeBgColor = (color: ColorResult) => {
     setBgColor(color.hex);
   };
 
+  const changeTxColor = (color: ColorResult) => {
+    setTxColor(color.hex);
+  };
   return (
     <>
       <div className={`Mode ${darkMode ? "dark" : "light"}`}>
@@ -65,18 +83,18 @@ function App() {
         <div className="preview">
           {png && (
             <div className="comp" style={{ display: "flex" }}>
-              <img alt="icon" src={png} />
+              <img alt="icon" src={png} height={height} width={width} />
             </div>
           )}
         </div>
         <div className="separate">
           <div className="left">
-            <form>
+            <form onSubmit={handleSubmit(onSubmit)}>
               <button
                 className="addSingle"
                 onClick={(e) => {
-                  append({ title: "" });
-                  handleSubmit(e);
+                  append({ text: "" });
+                  dissableClick(e);
                 }}
               >
                 追加
@@ -87,13 +105,13 @@ function App() {
                     <div className="single" key={field.id}>
                       <input
                         type="text"
-                        {...register(`sample.${index}.title`)}
+                        {...register(`titles.${index}.text`)}
                       />
                       <button
                         className="remove"
                         onClick={(e) => {
                           remove(index);
-                          handleSubmit(e);
+                          dissableClick(e);
                         }}
                       >
                         削除
@@ -102,15 +120,25 @@ function App() {
                   </li>
                 ))}
               </ul>
+              <button type="submit">反映</button>
             </form>
           </div>
           <div className="right">
             <div className="ChangeBG">
-              <button onClick={toggleVisibility}>背景</button>
-              {isVisible && (
+              <button onClick={toggleVisibilityBG}>背景色</button>
+              {isVisibleBG && (
                 <CompactPicker
                   className="picker"
-                  onChange={changeTextColor}
+                  onChange={changeBgColor}
+                ></CompactPicker>
+              )}
+            </div>
+            <div className="ChangeTX">
+              <button onClick={toggleVisibilityTX}>テキスト色</button>
+              {isVisibleTX && (
+                <CompactPicker
+                  className="picker"
+                  onChange={changeTxColor}
                 ></CompactPicker>
               )}
             </div>
