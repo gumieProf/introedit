@@ -6,6 +6,8 @@ import "./App.css";
 const width = 512;
 const height = 255;
 let titles = {};
+let size = "45px"
+let font = "serif"
 
 function App() {
   const [png, setPng] = useState<string | null>(null);
@@ -30,12 +32,16 @@ function App() {
     ctx.clearRect(0, 0, canvasElem.width, canvasElem.height);
     ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, canvasElem.width, canvasElem.height);
-
+    ctx.font =size+ " "+font;
+    
+    let x = 100;
+    let y = 100;
+    ctx.font = font + " " + size;
+    
     ctx.fillStyle = textColor;
     for (let i = 0; i < Object.keys(titles).length; i++) {
-      let x = 100;
-      ctx.fillText(titles[i].text, x, 300);
-      x = x + 200;
+      ctx.fillText(titles[i].text, x, y);
+      y = y + 40;
     }
     setPng(canvasElem.toDataURL());
   }, [bgColor, setBgColor, textColor]);
