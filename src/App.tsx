@@ -21,14 +21,11 @@ function App() {
   const toggleVisibilityTX = () => {
     setIsVisibleTX(!isVisibleTX);
   };
-  useEffect(() => {
+  function Draw() {
     const canvasElem = document.createElement("canvas");
     canvasElem.width = width * 2;
     canvasElem.height = height * 2;
     const ctx = canvasElem.getContext("2d");
-
-    // draw
-
     ctx.clearRect(0, 0, canvasElem.width, canvasElem.height);
     ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, canvasElem.width, canvasElem.height);
@@ -44,7 +41,10 @@ function App() {
       y = y + 40;
     }
     setPng(canvasElem.toDataURL());
-  }, [bgColor, setBgColor, textColor]);
+  }
+  useEffect(() => {
+    Draw()
+  });
 
   const [darkMode, setDarkMode] = useState(false);
 
@@ -70,6 +70,7 @@ function App() {
   const onSubmit = (data) => {
     titles = data.titles;
     console.log(JSON.stringify(titles));
+    Draw();
   };
   const changeBgColor = (color: ColorResult) => {
     setBgColor(color.hex);
@@ -111,7 +112,9 @@ function App() {
                     <div className="single" key={field.id}>
                       <input
                         type="text"
-                        {...register(`titles.${index}.text`)}
+                        {
+                          ...register(`titles.${index}.text`)
+                        }
                       />
                       <button
                         className="remove"
